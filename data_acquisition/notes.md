@@ -1,12 +1,12 @@
 # Prise de mesures du 2023-11-17 (UTC):
 
 Début de la prise de mesures à 1:40:00 UTC \
-Fin de la prise de mesures à 3:01:00 UTC \
+Fin de la prise de mesures à 3:01:00 UTC
 
 # Prise de mesures du 2024-02-06 (UTC):
 
 Début de la prise de mesures à 0:50:00 UTC \
-Fin de la prise de mesures à 04:34:00 UTC \
+Fin de la prise de mesures à 04:34:00 UTC
 
 ## Notes
 
