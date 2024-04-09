@@ -16,6 +16,9 @@ File_Tom= 'C:\\Users\\labot\\Downloads\\2024-02-05-date-a-Will.csv'
 # ouverture du fichier contenant les données de Jerry
 df = pd.read_csv(File_Jerry)
 
+#transformer les valeurs négatives en 0
+df['lux'] = df['lux'].clip(lower=0)
+
 # Effacement des colonnes de données inutilisées
 df.drop(['NumberSatellites','Gain','AcquisitionTime(ms)'], axis=1, inplace=True)
 
@@ -48,9 +51,6 @@ df_s1_n = df_s1.loc[mask]
 
 #Effacement des colonnes inutilisées dans l'analyse du lux
 df_s1_n_lux = df_s1_n.drop(['ColorTemperature(k)','MSI','Red','Green','Blue','Clear','Flag'], axis=1)
-
-#transformer les valeurs négatives en 0
-df_s1_n_lux['lux'] = df_s1_n_lux['lux'].clip(lower=0)
 
 #Afficher le tableux des données pour l'analyse du lux
 print(df_s1_n_lux)
@@ -93,13 +93,12 @@ df_s1_n_ = df_s1_.loc[mask1]
 # Effacement des colonnes inutilisées dans l'analyse du lux
 df_s1_n_lux_ = df_s1_n_.drop(['ColorTemperature(k)','MSI','Red','Green','Blue','Clear','Flag'], axis=1)
 
-#transformer les valeurs négatives en 0
-df_s1_n_lux_['lux'] = df_s1_n_lux_['lux'].clip(lower=0)
-
 #Combinaison des Dataframe Tom et Jerry pour l'analyse du lux
 df_Tom_Jerry = pd.concat([df_s1_n_lux, df_s1_n_lux_])
 
-#MSI impact Jerry
+
+
+#Calcul du MSI pour Jerry
 df_s3= df.loc[df['Sensor'] == 'S3']
 df_s3.reset_index(drop=True, inplace=True)
 df_s3.drop(['Latitude','Longitude','Altitude','Red','Green','Blue','Clear','DateTime'], axis=1, inplace=True)
