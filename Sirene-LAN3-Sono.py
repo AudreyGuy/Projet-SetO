@@ -13,7 +13,7 @@ position = Sun(45.40, -71.88)
 
 #Définition de l'intervalle de temps pour le mean
 
-intervalle=5
+intervalle='5min'
 
 #-----------------------------------------------------LAN3-----------------------------------------------------------
 
@@ -132,7 +132,7 @@ merged_df.columns = merged_df.columns.str.strip()
 colonnes_a_moyenner = ['MSIImpact', 'lux']
 
 # Resample et moyennage par intervalles de 5 minutes
-df_5min_lan3 = merged_df[colonnes_a_moyenner].resample(intervalle+'min').mean()
+df_5min_lan3 = merged_df[colonnes_a_moyenner].resample(intervalle).mean()
 df_5min_lan3 = df_5min_lan3.dropna()
 
 # Réinitialiser l'index si nécessaire
@@ -205,7 +205,7 @@ merged_df['Lpeak dB-A'] = merged_df['Lpeak dB-A'].astype(float)
 
 
 # Resample et moyennage par intervalles de 5 minutes
-df_5min_sono = merged_df[colonnes_a_moyenner].resample(intervalle+'min').mean()
+df_5min_sono = merged_df[colonnes_a_moyenner].resample(intervalle).mean()
 df_5min_sono = df_5min_sono.dropna()
 
 
