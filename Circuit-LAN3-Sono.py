@@ -1,18 +1,25 @@
+#Importation des librairies
 import pandas as pd
+
+#Paramétrage de la fenêtre 'run'
 pd.set_option('display.max_rows', 1000)
 pd.set_option('display.max_columns', 30)
 pd.set_option('display.width', 1000)
 
-# Specify the path to your CSV file
+#------------------------
+
+#Définition du chemin du fichier LAN3
 file_path = 'C:\\Users\\labot\\Downloads\\LAN3-2023-11-16.csv'
 
+
+
+# Boucle pour l'ouverture du fichier CSV et résolution de erreurs de format
 try:
-    # Attempt to read the CSV file, handling parsing errors
     df = pd.read_csv(file_path, on_bad_lines='skip')
 
 except pd.errors.ParserError as e:
     print("ParserError:", e)
-    # Handle the error as needed, such as logging or displaying an error message
+    # Gestion des erreurs de format et affichage d'un message d'erreur
 
 df['Second'] = df['Second'].astype(int)
 
