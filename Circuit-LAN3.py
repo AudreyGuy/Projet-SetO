@@ -1,108 +1,103 @@
+#importation des librairies nécessaires
 import pandas as pd
 pd.set_option('display.max_rows', 1000)
 pd.set_option('display.max_columns', 30)
 pd.set_option('display.width', 1000)
 
-# read csv file Jerry
-df = pd.read_csv('C:\\Users\labot\Downloads\\2024-02-06.csv')
+#Définition des heures de début et de fin de l'analyse des données
+Date_min='2024-02-05 19:37:00'
+Date_max='2024-02-05 23:25:00'
 
-# deleting columns form dataframe
+#Définition des chemins des fichiers à analyser
+File_Jerry= 'C:\\Users\labot\Downloads\\2024-02-06.csv'
+File_Tom= 'C:\\Users\\labot\\Downloads\\2024-02-05-date-a-Will.csv'
+
+
+# ouverture du fichier contenant les données de Jerry
+df = pd.read_csv(File_Jerry)
+
+# Effacement des colonnes de données inutilisées
 df.drop(['NumberSatellites','Gain','AcquisitionTime(ms)'], axis=1, inplace=True)
 
-# converting 'Second' from float to int
+# conversion des 'Second' de float à int
 df['Second'] = df['Second'].astype(int)
 
-# converting DateTime
+# conversion de l'heure et de la date en format DateTime et conversion d'UTC à l'heure locale
 df['DateTime'] = pd.to_datetime(df[['Month', 'Day', 'Year','Hour','Minute','Second']])
 df['DateTime'] = pd.to_datetime(df['DateTime'], utc=True)
 df['DateTime'] = df['DateTime'].dt.tz_convert("US/Eastern")
 
-# convert to string without offset
+# arondir les secondes et ajuster le format DateTime
 df['DateTime'] = df['DateTime'].dt.strftime("%Y-%m-%d %H:%M:%S")
 
-# deleting columns form dataframe
+# effacement des colonnes d'heure et de date pour garder uniquement le DateTime
 df.drop(['Month','Day','Year','Hour','Minute','Second'], axis=1, inplace=True)
 
-# new dataframe with only S1 values
+# création d'une nouvelle base de données conservant unoiquement le capteur S1
 df_s1= df.loc[df['Sensor'] == 'S1']
 
-#Removing row with ER
+#Effacement des lignes contenant le Flag ER
 df_s1= df_s1[df_s1['Flag'] != 'ER']
 
-#Removing row with N\A
+#Effacement des lignes ayant N\A comme ColorTemperature(k)
 df_s1= df_s1[df_s1['ColorTemperature(k)'] != 'NaN']
 
-# keeping night values
-mask = (df_s1['DateTime']>'2024-02-05 19:37:00') & (df_s1['DateTime']<='2024-02-05 23:25:00')
+# Restrictions des données utilisé en fonction de l'heure
+mask = (df_s1['DateTime']>Date_min) & (df_s1['DateTime']<=Date_max)
 df_s1_n = df_s1.loc[mask]
 
-# deleting duplicates
-#df_s1_n = df_s1_n.sort_values('DateTime').drop_duplicates('DateTime', keep='last')
-
-#MSI
-#df_s1_n_MSI = df_s1_n.drop(['ColorTemperature(k)','lux','Red','Green','Blue','Clear'], axis=1)
-
-#lux
+#Effacement des colonnes inutilisées dans l'analyse du lux
 df_s1_n_lux = df_s1_n.drop(['ColorTemperature(k)','MSI','Red','Green','Blue','Clear','Flag'], axis=1)
 
 #transformer les valeurs négatives en 0
 df_s1_n_lux['lux'] = df_s1_n_lux['lux'].clip(lower=0)
 
-
-
-#print(df_s1_n_lux)
+#Afficher le tableux des données pour l'analyse du lux
 print(df_s1_n_lux)
 
-# read csv file Tom
-df_1 = pd.read_csv('C:\\Users\\labot\\Downloads\\2024-02-05-date-a-Will.csv')
 
-# deleting columns form dataframe
+
+# ouverture du fichier contenant les données de Tom
+df_1 = pd.read_csv(File_Tom)
+
+# Effacement des colonnes inutilisées
 df_1.drop(['NumberSatellites','Gain','AcquisitionTime(ms)'], axis=1, inplace=True)
 
-# converting 'Second' from float to int
+# Conversion des 'Second' de float à int
 df_1['Second'] = df_1['Second'].astype(int)
 
-# converting DateTime
+# Conversion de la date et de l'heure en format DateTime et conversion d'UTC à l'heure locale
 df_1['DateTime'] = pd.to_datetime(df_1[['Month', 'Day', 'Year','Hour','Minute','Second']])
 df_1['DateTime'] = pd.to_datetime(df_1['DateTime'], utc=True)
 df_1['DateTime'] = df_1['DateTime'].dt.tz_convert("US/Eastern")
 
-# convert to string without offset
+# arondir les secondes et ajuster le format DateTime
 df_1['DateTime'] = df_1['DateTime'].dt.strftime("%Y-%m-%d %H:%M:%S")
 
-# deleting columns form dataframe
+# Enlever les colonnes de date et d'heures pour conserver uniquement la colonne DateTime
 df_1.drop(['Month','Day','Year','Hour','Minute','Second'], axis=1, inplace=True)
 
-# new dataframe with only S1 values
+# création d'une nouvelle base de données conservant uniquement les données du capteur S1 
 df_s1_= df_1.loc[df['Sensor'] == 'S1']
 
-#Removing row with ER
+# Enlever les ligne ayant le flag ER
 df_s1_= df_s1_[df_s1_['Flag'] != 'ER']
 
-#Removing row with N\A
+# Elever les lignes ayant N\A comme ColorTemperature(k)
 df_s1_= df_s1_[df_s1_['ColorTemperature(k)'] != 'NaN']
 
-# keeping night values
+# Restrictions des données analysées aux heures sélectionnées
 mask1 = (df_s1_['DateTime']>'2024-02-04 19:37:00') & (df_s1_['DateTime']<='2024-02-04 23:25:00')
 df_s1_n_ = df_s1_.loc[mask1]
 
-# deleting duplicates
-#df_s1_n = df_s1_n.sort_values('DateTime').drop_duplicates('DateTime', keep='last')
-
-#MSI
-#df_s1_n_MSI = df_s1_n.drop(['ColorTemperature(k)','lux','Red','Green','Blue','Clear'], axis=1)
-
-#lux
+# Effacement des colonnes inutilisées dans l'analyse du lux
 df_s1_n_lux_ = df_s1_n_.drop(['ColorTemperature(k)','MSI','Red','Green','Blue','Clear','Flag'], axis=1)
 
-#print(df_s1_n_)
-#print(df_s1_n_MSI)
-#print(df_s1_n_lux_)
+#transformer les valeurs négatives en 0
+df_s1_n_lux_['lux'] = df_s1_n_lux_['lux'].clip(lower=0)
 
-#Combining Dataframe Tom and Jerry lux
+#Combinaison des Dataframe Tom et Jerry pour l'analyse du lux
 df_Tom_Jerry = pd.concat([df_s1_n_lux, df_s1_n_lux_])
-
-#print(df_Tom_Jerry)
 
 #MSI impact Jerry
 df_s3= df.loc[df['Sensor'] == 'S3']
