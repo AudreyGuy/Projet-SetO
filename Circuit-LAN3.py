@@ -94,7 +94,7 @@ df_s1_= df_s1_[df_s1_['Flag'] != 'ER']
 df_s1_= df_s1_[df_s1_['ColorTemperature(k)'] != 'NaN']
 
 # Restrictions des données analysées aux heures sélectionnées
-mask1 = (df_s1_['DateTime']>'2024-02-04 19:37:00') & (df_s1_['DateTime']<='2024-02-04 23:25:00')
+mask1 = (df_s1_['DateTime']> Date_min) & (df_s1_['DateTime']<= Date_max)
 df_s1_n_ = df_s1_.loc[mask1]
 
 # Effacement des colonnes inutilisées dans l'analyse du lux
@@ -127,14 +127,14 @@ df_c = df_c.dropna()
 df_c= df_c[df_c['Flag3'] != 'ER']
 df_c= df_c[df_c['Flag5'] != 'ER']
 
-# keeping night values
-mask2 = (df_c['DateTime']>'2024-02-05 19:37:00') & (df_c['DateTime']<='2024-02-05 23:25:00')
-df_c = df_c.loc[mask2]
+# Restrictions des données utilisé en fonction de l'heure
+mask2 = (df_c['DateTime']> Date_min) & (df_c['DateTime']<= Date_max)
+df_c = df_c.loc[mask2] 
 
 df_MSIIj = df_c.drop(['Sensor3','Sensor5','ColorTemperature(k)3','ColorTemperature(k)5','MSI3','MSI5','lux3','lux5','Flag3','Flag5'], axis=1)
 
 
-#MSI impact Tom
+#Calcul du MSI pour Tom
 df_s3t= df_1.loc[df_1['Sensor'] == 'S3']
 df_s3t.reset_index(drop=True, inplace=True)
 df_s3t.drop(['Latitude','Longitude','Altitude','Red','Green','Blue','Clear','DateTime'], axis=1, inplace=True)
@@ -156,17 +156,19 @@ df_ct = df_ct.dropna()
 df_ct= df_ct[df_ct['Flag3'] != 'ER']
 df_ct= df_ct[df_ct['Flag5'] != 'ER']
 
-# keeping night values
-mask3 = (df_ct['DateTime']>'2024-02-04 19:37:00') & (df_ct['DateTime']<='2024-02-04 23:25:00')
+# Restrictions des données utilisé en fonction de l'heure
+mask3 = (df_ct['DateTime']> Date_min) & (df_ct['DateTime']<= Date_max)
 df_ct = df_ct.loc[mask3]
 
+# Élimination des colonnes déjà utilisé
 df_MSIIt = df_ct.drop(['Sensor3','Sensor5','ColorTemperature(k)3','ColorTemperature(k)5','MSI3','MSI5','lux3','lux5','Flag3','Flag5'], axis=1)
 
+#Combinaison des dataframes
 df_MSII = pd.concat([df_MSIIt, df_MSIIj], axis=0)
 
 print(df_MSII)
 
-
+# Importation des nouveaux fichiers
 df_Tom_Jerry.to_csv(r'C:\Users\Jejeb\OneDrive\Bureau\SetO\Données analysées\LAN3_Tom_and_Jerry_lux_2024-02-05.csv', index=False, sep=',')
 df_MSII.to_csv(r'C:\Users\Jejeb\OneDrive\Bureau\SetO\Données analysées\LAN3_Tom_and_Jerry_MSI_Impact_2024-02-05.csv', index=False, sep=',')
 
