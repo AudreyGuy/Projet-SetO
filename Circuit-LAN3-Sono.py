@@ -1,7 +1,7 @@
 # Importation des librairies
 import pandas as pd
 
-#Paramétrage de la fenêtre 'run'
+# Paramétrage de la fenêtre 'run'
 pd.set_option('display.max_rows', 1000)
 pd.set_option('display.max_columns', 30)
 pd.set_option('display.width', 1000)
