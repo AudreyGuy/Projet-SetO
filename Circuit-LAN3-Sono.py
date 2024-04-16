@@ -7,8 +7,8 @@ pd.set_option('display.max_columns', 30)
 pd.set_option('display.width', 1000)
 
 # Définition des dates/heures de début et de fin de la période d'acquisition
-date/heure_début = '2024-01-01 00:00:00'
-date/heure_fin = '2024-01-01 00:00:00'
+date_heure_début = '2024-01-01 00:00:00'
+date_heure_fin = '2024-01-01 00:00:00'
 
 #-------------------------------------------------LAN3---------------------------------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ df_s1= df_s1[df_s1['Flag'] != 'ER']
 df_s1= df_s1[df_s1['ColorTemperature(k)'] != 'NaN']
 
 # Masque pour garder que les données de nuits (ou celle de la periode d'acquisition de données)
-mask = (df_s1['DateTime']> date/heure_début) & (df_s1['DateTime']<= date/heure_fin)
+mask = (df_s1['DateTime']> date_heure_début) & (df_s1['DateTime']<= date_heure_fin)
 df_s1_n = df_s1.loc[mask]
 
 # Nouveau dataframe avec seulement les valeurs de lux
@@ -95,7 +95,7 @@ df_c= df_c[df_c['Flag3'] != 'ER']
 df_c= df_c[df_c['Flag5'] != 'ER']
 
 # Masque pour garder que les données de nuits (ou celle de la periode d'acquisition de données)
-mask2 = (df_c['DateTime']> date/heure_début) & (df_c['DateTime']<= date/heure_fin)
+mask2 = (df_c['DateTime']> date_heure_début) & (df_c['DateTime']<= date_heure_fin)
 df_c = df_c.loc[mask2]
 
 # Conservation seulement de la colonne MSI impact 
