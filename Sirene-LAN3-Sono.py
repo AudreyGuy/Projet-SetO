@@ -1,9 +1,11 @@
+# Importation des librairies
 import pandas as pd
 from suntime import Sun
 import os
 from datetime import timedelta
 import pytz
 
+# Paramétrage de la fenêtre 'run'
 pd.set_option('display.max_rows', 1000)
 pd.set_option('display.max_columns', 30)
 pd.set_option('display.width', 1000)
@@ -12,7 +14,6 @@ pd.set_option('display.width', 1000)
 position = Sun(45.40, -71.88)
 
 #Définition de l'intervalle de temps pour le mean
-
 intervalle='5min'
 
 #-----------------------------------------------------LAN3-----------------------------------------------------------
@@ -34,21 +35,24 @@ for file in file_list:
             # Ouverture du fichier csv sous la forme d'un dataframe et stockage dans la variable 'df'
             df = pd.read_csv(dossier + file, delimiter=',', low_memory=False)
 
-            #Dropper les lignes vides
+            # Dropper les lignes vides
             df.dropna(inplace=True)
 
-            # deleting columns form dataframe
+            # transformer les valeurs négatives en 0
+            df['lux'] = df['lux'].clip(lower=0)
+
+            # Suppression des colonnes inutile de df
             df.drop(['NumberSatellites', 'Gain', 'AcquisitionTime(ms)', 'Latitude', 'Longitude', 'Altitude', ], axis=1, inplace=True)
 
-            #Arrondir à la seconde
+            # Transformation du format des secondes en entier (arrondissement à la seconde)
             df['Second'] = df['Second'].astype(int)
 
-            # modifier le format de l'heure en datetime
+            # Convertion des colones mois/jours/années/heures/minutes/secondes en une colonne Datetime avec le format datetime
             df['DateTime'] = pd.to_datetime(df[['Year', 'Month', 'Day', 'Hour', 'Minute', 'Second']])
             df['DateTime'] = pd.to_datetime(df['DateTime'])
 
 
-            # enlever les colones double de date
+            # Suppression des colonnes 'dates/temps' nouvellement assemblées en une seule
             df.drop(['Year', 'Month', 'Day', 'Hour', 'Minute', 'Second'], axis=1, inplace=True)
 
             # données de MSI
@@ -96,9 +100,6 @@ for file in file_list:
 
             df_c.drop(['Sensor3', 'ColorTemperature(k)3', 'Flag3', 'Sensor5', 'ColorTemperature(k)5', 'Flag5', 'Sensor1', 'ColorTemperature(k)1', 'Flag1'], axis=1, inplace=True)
 
-            # transformer les valeurs négatives en 0
-            df_c['lux'] = df_c['lux'].clip(lower=0)
-
             # Filtrage des données
             crepuscule_soir = position.get_sunset_time(df_c['DateTime'][1])
             crepuscule_matin = position.get_sunrise_time(df_c['DateTime'][1])
@@ -111,9 +112,12 @@ for file in file_list:
             #Application d'un mask pour garder que les valeurs de nuits
             mask = (df_c['DateTime'] >= crepuscule_soir) | (df_c['DateTime'] <= crepuscule_matin)
             df_c = df_c.loc[mask]
+
+            # Conversion en temps de l'est
             df_c['DateTime'] = pd.to_datetime(df_c['DateTime'], utc=True)
             df_c['DateTime'] = df_c['DateTime'].dt.tz_convert("US/Eastern")
             df_c['DateTime'] = df_c['DateTime'].dt.strftime("%Y-%m-%d %H:%M:%S")
+        
             dff.append(df_c)
 
     except Exception as e:
@@ -127,8 +131,11 @@ merged_df = pd.concat(dff, axis=0)
 # Convertir la colonne 'DateTime' en datetime et la définir comme index
 merged_df['DateTime'] = pd.to_datetime(merged_df['DateTime'])
 merged_df.set_index('DateTime', inplace=True)
+
+#suppression des espaces autour des noms de colonnes
 merged_df.columns = merged_df.columns.str.strip()
 
+# Définition des colonnes à moyenner
 colonnes_a_moyenner = ['MSIImpact', 'lux']
 
 # Resample et moyennage par intervalles de 5 minutes
@@ -137,9 +144,6 @@ df_5min_lan3 = df_5min_lan3.dropna()
 
 # Réinitialiser l'index si nécessaire
 df_5min_lan3.reset_index(inplace=True)
-
-print(df_5min_lan3)
-
 
 #-----------------------------------------------Sonomètre-------------------------------------------------------------
 
@@ -212,7 +216,6 @@ df_5min_sono = df_5min_sono.dropna()
 # Réinitialiser l'index si nécessaire
 df_5min_sono.reset_index(inplace=True)
 
-print(df_5min_sono)
 
 #---------------------------------------------------Lan3 et sonomètre -------------------------------------------------------
 
@@ -220,8 +223,6 @@ print(df_5min_sono)
 df_cf = pd.merge(df_5min_sono, df_5min_lan3, on='DateTime', how='inner')
 
 df_cf = df_cf.drop_duplicates(subset=['DateTime'])
-
-print(df_cf)
 
 df_cf.to_csv(r'C:\Users\labot\Downloads\Sirene_données-filtrées-mean_5min.csv', index=False, sep=',')
 
