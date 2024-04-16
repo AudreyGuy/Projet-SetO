@@ -6,7 +6,7 @@ pd.set_option('display.max_rows', 1000)
 pd.set_option('display.max_columns', 30)
 pd.set_option('display.width', 1000)
 
-# Définition des dates/heures de débuts et de fin de la période d'acquisition
+# Définition des dates/heures de début et de fin de la période d'acquisition
 date/heure_début = '2024-01-01 00:00:00'
 date/heure_fin = '2024-01-01 00:00:00'
 
