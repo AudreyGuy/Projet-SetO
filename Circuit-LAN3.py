@@ -9,8 +9,8 @@ Date_min='2024-02-05 19:37:00'
 Date_max='2024-02-05 23:25:00'
 
 #Définition des chemins des fichiers à analyser
-File_Jerry= 'C:\\Users\labot\Downloads\\2024-02-06.csv'
-File_Tom= 'C:\\Users\\labot\\Downloads\\2024-02-05-date-a-Will.csv'
+File_Jerry= "C:\\Users\\Jejeb\\OneDrive\\Bureau\\SetO\\Prise de messure\\Lan3\\Jerry\\2024-02-06.csv"
+File_Tom= "C:\\Users\\Jejeb\\OneDrive\\Bureau\\SetO\\Prise de messure\\Lan3\\Tom\\2024-02-05-date-a-Will.csv"
 
 
 # ouverture du fichier contenant les données de Jerry
@@ -18,6 +18,8 @@ df = pd.read_csv(File_Jerry)
 
 #transformer les valeurs négatives en 0
 df['lux'] = df['lux'].clip(lower=0)
+
+df['MSI']= df['MSI'].clip(lower=0)
 
 # Effacement des colonnes de données inutilisées
 df.drop(['NumberSatellites','Gain','AcquisitionTime(ms)'], axis=1, inplace=True)
@@ -60,6 +62,11 @@ print(df_s1_n_lux)
 # ouverture du fichier contenant les données de Tom
 df_1 = pd.read_csv(File_Tom)
 
+#transformer les valeurs négatives en 0
+df_1['lux'] = df_1['lux'].clip(lower=0)
+
+df_1['MSI']= df_1['MSI'].clip(lower=0)
+
 # Effacement des colonnes inutilisées
 df_1.drop(['NumberSatellites','Gain','AcquisitionTime(ms)'], axis=1, inplace=True)
 
@@ -77,7 +84,7 @@ df_1['DateTime'] = df_1['DateTime'].dt.strftime("%Y-%m-%d %H:%M:%S")
 # Enlever les colonnes de date et d'heures pour conserver uniquement la colonne DateTime
 df_1.drop(['Month','Day','Year','Hour','Minute','Second'], axis=1, inplace=True)
 
-# création d'une nouvelle base de données conservant uniquement les données du capteur S1 
+# création d'une nouvelle base de données conservant uniquement les données du capteur S1
 df_s1_= df_1.loc[df['Sensor'] == 'S1']
 
 # Enlever les ligne ayant le flag ER
@@ -157,11 +164,11 @@ df_MSIIt = df_ct.drop(['Sensor3','Sensor5','ColorTemperature(k)3','ColorTemperat
 
 df_MSII = pd.concat([df_MSIIt, df_MSIIj], axis=0)
 
-#print(df_MSII)
+print(df_MSII)
 
 
-#df_Tom_Jerry.to_csv(r'C:\Users\labot\Downloads\LAN3_Tom_and_Jerry_lux_2024-02-05.csv', index=False, sep=',')
-#df_MSII.to_csv(r'C:\Users\labot\Downloads\LAN3_Tom_and_Jerry_MSI_Impact_2024-02-05.csv', index=False, sep=',')
+df_Tom_Jerry.to_csv(r'C:\Users\Jejeb\OneDrive\Bureau\SetO\Données analysées\LAN3_Tom_and_Jerry_lux_2024-02-05.csv', index=False, sep=',')
+df_MSII.to_csv(r'C:\Users\Jejeb\OneDrive\Bureau\SetO\Données analysées\LAN3_Tom_and_Jerry_MSI_Impact_2024-02-05.csv', index=False, sep=',')
 
 #df_s1_n.to_csv(r'C:\Users\labot\Downloads\LAN3_Jerry_2024-02-05.csv', index=False, sep=',')
 #df_s1_n_MSI.to_csv(r'C:\Users\labot\Downloads\LAN3_Jerry_2024-02-05_MSI.csv', index=False, sep=',')
