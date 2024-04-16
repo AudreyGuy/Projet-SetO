@@ -26,7 +26,9 @@ except pd.errors.ParserError as e:
     # Gestion des erreurs de format et affichage d'un message d'erreur
 
 # Transformation des valeurs négatives en 0
+df['lux'] = df['lux'].clip(lower=0)
 
+df['MSI']= df['MSI'].clip(lower=0)
 
 # Transformation du format des secondes en entier (arrondissement à la seconde)
 df['Second'] = df['Second'].astype(int)
