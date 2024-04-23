@@ -36,7 +36,7 @@ for file in file_list:
             df = pd.read_csv(dossier + file, delimiter=',', low_memory=False)
 
             # Dropper les lignes vides
-            df.dropna(inplace=True)
+           # df.dropna(inplace=True)
 
             # transformer les valeurs négatives en 0
             df['lux'] = df['lux'].clip(lower=0)
