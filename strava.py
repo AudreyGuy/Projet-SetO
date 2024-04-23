@@ -45,6 +45,14 @@ df_asterix['DateTime'] = df_asterix['DateTime'].dt.strftime("%Y-%m-%d %H:%M:%S")
 # Combinaison du df Strava et sonometre
 df_c = pd.merge(df, df_asterix, on='DateTime', how='inner')
 
+for col in df_c.columns:
+    df_c[col] = df_c[col].astype(str).str.replace(',', '.')
+
+# Transformer les valeurs en flottants
+df_c[' L-Max dB -A '] = df_c[' L-Max dB -A '].astype(float)
+df_c[' LEQ dB -A '] = df_c[' LEQ dB -A '].astype(float)
+df_c[' L-Min dB -A '] = df_c[' L-Min dB -A '].astype(float)
+
 #--------------------------------------------Sonomètre Obélix---------------------------------------------------------
 
 # Définition du chemin du fichier sono
@@ -68,7 +76,15 @@ df_obelix['DateTime'] = df_obelix['DateTime'].dt.strftime("%Y-%m-%d %H:%M:%S")
 # Combinaison du df Strava et sonometre
 df_c1 = pd.merge(df, df_obelix, on='DateTime', how='inner')
 
+for col in df_c1.columns:
+    df_c1[col] = df_c1[col].astype(str).str.replace(',', '.')
 
+# Transformer les valeurs en flottants
+df_c1[' L-Max dB -A '] = df_c1[' L-Max dB -A '].astype(float)
+df_c1[' LEQ dB -A '] = df_c1[' LEQ dB -A '].astype(float)
+df_c1[' L-Min dB -A '] = df_c1[' L-Min dB -A '].astype(float)
+
+print(df_c.info())
 print(df_c,df_c1)
 
 df_c.to_csv(r'C:\Users\labot\Downloads\velo1_sonometre_2024-04-02.csv', index=False, sep=',')
