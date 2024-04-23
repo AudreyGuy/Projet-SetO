@@ -72,9 +72,6 @@ for file in file_list:
 
             df_m = pd.concat([df_s3, df_s5], axis=1)
 
-            df_m['MSIImpact'] = ((df_m['MSI3'] * df_m['lux3']) + (df_m['MSI5'] * df_m['lux5'])) / 2
-
-            df_m.drop(['MSI3', 'MSI5', 'lux3', 'lux5'], axis=1, inplace=True)
 
             # Mesure du lux avec capteur S1
             df_l = df.loc[df['Sensor'] == 'S1']
@@ -98,13 +95,53 @@ for file in file_list:
             df_c = df_c[df_c['ColorTemperature(k)3'] != 'NaN']
             df_c = df_c[df_c['ColorTemperature(k)5'] != 'NaN']
 
-            df_c.drop(['Sensor3', 'ColorTemperature(k)3', 'Flag3', 'Sensor5', 'ColorTemperature(k)5', 'Flag5', 'Sensor1', 'ColorTemperature(k)1', 'Flag1'], axis=1, inplace=True)
+            #Enlever les lignes avec des données négatives (lux, MSI, ColorTemperature(k))
 
+            # Convertir toutes les valeurs en chaînes de caractères
+            df_c['lux'] = df_c['lux'].astype(str)
+            df_c['lux3'] = df_c['lux3'].astype(str)
+            df_c['lux5'] = df_c['lux5'].astype(str)
+            df_c['MSI3'] = df_c['MSI3'].astype(str)
+            df_c['MSI5'] = df_c['MSI5'].astype(str)
+            df_c['ColorTemperature(k)1'] = df_c['ColorTemperature(k)1'].astype(str)
+            df_c['ColorTemperature(k)3'] = df_c['ColorTemperature(k)3'].astype(str)
+            df_c['ColorTemperature(k)5'] = df_c['ColorTemperature(k)5'].astype(str)
+
+            # Supprimer les lignes avec "-" comme caractère
+            df_c = df_c[~df_c['lux'].str.contains('-', na=False)]
+            df_c = df_c[~df_c['lux3'].str.contains('-', na=False)]
+            df_c = df_c[~df_c['lux5'].str.contains('-', na=False)]
+            df_c = df_c[~df_c['MSI3'].str.contains('-', na=False)]
+            df_c = df_c[~df_c['MSI5'].str.contains('-', na=False)]
+            df_c = df_c[~df_c['ColorTemperature(k)1'].str.contains('-', na=False)]
+            df_c = df_c[~df_c['ColorTemperature(k)3'].str.contains('-', na=False)]
+            df_c = df_c[~df_c['ColorTemperature(k)5'].str.contains('-', na=False)]
+
+            # Retransformer les valeurs en flottants
+            df_c['lux'] = df_c['lux'].astype(float)
+            df_c['lux3'] = df_c['lux3'].astype(float)
+            df_c['lux5'] = df_c['lux5'].astype(float)
+            df_c['MSI3'] = df_c['MSI3'].astype(float)
+            df_c['MSI5'] = df_c['MSI5'].astype(float)
+            df_c['ColorTemperature(k)1'] = df_c['ColorTemperature(k)1'].astype(float)
+            df_c['ColorTemperature(k)3'] = df_c['ColorTemperature(k)3'].astype(float)
+            df_c['ColorTemperature(k)5'] = df_c['ColorTemperature(k)5'].astype(float)
+
+
+            df_c.drop(['Sensor3', 'ColorTemperature(k)3', 'Flag3', 'Sensor5', 'ColorTemperature(k)5', 'Flag5', 'Sensor1', 'ColorTemperature(k)1', 'Flag1'], axis=1, inplace=True)
+            
+            # Calcul du MSI Impact
+        
+            df_m['MSIImpact'] = ((df_m['MSI3'] * df_m['lux3']) + (df_m['MSI5'] * df_m['lux5'])) / 2
+
+            df_m.drop(['MSI3', 'MSI5', 'lux3', 'lux5'], axis=1, inplace=True)
+
+        
             # Filtrage des données
             crepuscule_soir = position.get_sunset_time(df_c['DateTime'][1])
             crepuscule_matin = position.get_sunrise_time(df_c['DateTime'][1])
-            crepuscule_soir = crepuscule_soir + timedelta(hours=24, minutes=30)
-            crepuscule_matin = crepuscule_matin - timedelta(minutes=30)
+            crepuscule_soir = crepuscule_soir + timedelta(hours=25)
+            crepuscule_matin = crepuscule_matin - timedelta(hours=1)
             crepuscule_soir = crepuscule_soir.strftime("%Y-%m-%d %H:%M:%S")
             crepuscule_matin = crepuscule_matin.strftime("%Y-%m-%d %H:%M:%S")
 
