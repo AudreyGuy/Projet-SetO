@@ -49,7 +49,6 @@ df_s1 = df_s1[~df_s1['ColorTemperature(k)'].str.contains('-', na=False)]
 # Retransformer les valeurs en flottants
 df_s1['lux'] = df_s1['lux'].astype(float)
 df_s1['MSI'] = df_s1['MSI'].astype(float)
-df_s1['ColorTemperature(k)'] = df_s1['ColorTemperature(k)'].astype(float)
 
 #Effacement des lignes contenant le Flag ER
 df_s1= df_s1[df_s1['Flag'] != 'ER']
@@ -102,7 +101,6 @@ df_s1_ = df_s1_[~df_s1_['ColorTemperature(k)'].str.contains('-', na=False)]
 # Retransformer les valeurs en flottants
 df_s1_['lux'] = df_s1_['lux'].astype(float)
 df_s1_['MSI'] = df_s1_['MSI'].astype(float)
-df_s1_['ColorTemperature(k)'] = df_s1_['ColorTemperature(k)'].astype(float)
 
 # Enlever les ligne ayant le flag ER
 df_s1_= df_s1_[df_s1_['Flag'] != 'ER']
@@ -158,8 +156,6 @@ df_c['lux3'] = df_c['lux3'].astype(float)
 df_c['lux5'] = df_c['lux5'].astype(float)
 df_c['MSI3'] = df_c['MSI3'].astype(float)
 df_c['MSI5'] = df_c['MSI5'].astype(float)
-df_c['ColorTemperature(k)3'] = df_c['ColorTemperature(k)3'].astype(float)
-df_c['ColorTemperature(k)5'] = df_c['ColorTemperature(k)5'].astype(float)
 
 df_c['MSI Impact'] = ((df_c['MSI3'] * df_c['lux3']) + (df_c['MSI5'] * df_c['lux5'])) / 2
 
@@ -211,8 +207,6 @@ df_ct['lux3'] = df_ct['lux3'].astype(float)
 df_ct['lux5'] = df_ct['lux5'].astype(float)
 df_ct['MSI3'] = df_ct['MSI3'].astype(float)
 df_ct['MSI5'] = df_ct['MSI5'].astype(float)
-df_ct['ColorTemperature(k)3'] = df_ct['ColorTemperature(k)3'].astype(float)
-df_ct['ColorTemperature(k)5'] = df_ct['ColorTemperature(k)5'].astype(float)
 
 df_ct['MSI Impact'] = ((df_ct['MSI3'] * df_ct['lux3']) + (df_ct['MSI5'] * df_ct['lux5'])) / 2
 
