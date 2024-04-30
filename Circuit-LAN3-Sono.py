@@ -55,7 +55,7 @@ df_s1 = df_s1[~df_s1['ColorTemperature(k)'].str.contains('-', na=False)]
 # Retransformer les valeurs en flottants
 df_s1['lux'] = df_s1['lux'].astype(float)
 df_s1['MSI'] = df_s1['MSI'].astype(float)
-df_s1['ColorTemperature(k)'] = df_s1['ColorTemperature(k)'].astype(float)
+
 
 # Enlever les lignes avec flag erreur
 df_s1= df_s1[df_s1['Flag'] != 'ER']
@@ -112,8 +112,7 @@ df_c['lux3'] = df_c['lux3'].astype(float)
 df_c['lux5'] = df_c['lux5'].astype(float)
 df_c['MSI3'] = df_c['MSI3'].astype(float)
 df_c['MSI5'] = df_c['MSI5'].astype(float)
-df_c['ColorTemperature(k)3'] = df_c['ColorTemperature(k)3'].astype(float)
-df_c['ColorTemperature(k)5'] = df_c['ColorTemperature(k)5'].astype(float)
+
 
 # Création d'une nouvelle colonne MSI impact et application du calcul de l'impact msi
 df_c['MSI Impact'] = ((df_c['MSI3'] * df_c['lux3']) + (df_c['MSI5'] * df_c['lux5'])) / 2
