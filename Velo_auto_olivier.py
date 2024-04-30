@@ -116,6 +116,10 @@ index_fin = 341
 # Nouveau df avec les données vélo
 df_v = df_c.iloc[index_debut:index_fin + 1]
 
+# Calculer la moyenne des valeurs de la colonne ' LEQ dB -A ' pour vélo
+moyenne_velo = df_v[' LEQ dB -A '].mean()
+
+print("Moyenne de LEQ vélo :", moyenne_velo)
 #------------------------------------------------------Auto-------------------------------------------------------------
 
 # Définir les heures de début et de fin (à partir de QGIS en identifiant les index correspondant) de la période d'acquisition en auto
@@ -125,6 +129,10 @@ index_fin = 1183
 # Nouveau df avec les données vélo
 df_a = df_c.iloc[index_debut:index_fin + 1]
 
+# Calculer la moyenne des valeurs de la colonne ' LEQ dB -A ' pour auto
+moyenne_auto = df_a[' LEQ dB -A '].mean()
+
+print("Moyenne de lEQ auto :", moyenne_auto)
 #---------------------------------------------------Exportation---------------------------------------------------------
 
 
