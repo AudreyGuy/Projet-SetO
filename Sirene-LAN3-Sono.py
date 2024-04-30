@@ -204,8 +204,8 @@ for file in file_list:
         # Filtrage des données
         crepuscule_soir = position.get_sunset_time(df['DateTime'][1])
         crepuscule_matin = position.get_sunrise_time(df['DateTime'][1])
-        crepuscule_soir = crepuscule_soir - timedelta(hours=4, minutes=30)
-        crepuscule_matin = crepuscule_matin - timedelta(hours=5, minutes=30)
+        crepuscule_soir = crepuscule_soir - timedelta(hours=4)
+        crepuscule_matin = crepuscule_matin - timedelta(hours=6)
         crepuscule_soir = crepuscule_soir.strftime("%Y-%m-%d %H:%M:%S")
         crepuscule_matin = crepuscule_matin.strftime("%Y-%m-%d %H:%M:%S")
 
