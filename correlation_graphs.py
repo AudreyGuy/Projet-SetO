@@ -167,12 +167,8 @@ ax7.set_ylabel("Pression (kPa)")
 ax7.legend(loc="upper right")
 
 # Format des dates sur l'axe X
-# axs[4].set_xlabel("Date")
-# axs[4].xaxis.set_major_locator(mdates.DayLocator())  # Un tick par jour
-# axs[4].xaxis.set_minor_locator(mdates.HourLocator(interval=1))  # Un tick par heure
-# axs[4].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))  # Format date-heure
-# for ax in axs:
-#     plt.setp(ax.xaxis.get_majorticklabels(), rotation=45)
+for ax in axs:
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=45)
 
 plt.tight_layout()
 
