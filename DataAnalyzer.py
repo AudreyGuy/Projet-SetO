@@ -168,11 +168,119 @@ class DataAnalyzer:
         plt.grid(True, linestyle="--", linewidth=0.5)
         plt.xticks(np.arange(0, 24, 1))  # Ticks de 0 à 23, un tick par heure
         plt.show()
+
+    def analyze_correlation_at_noon(self, first_element, second_element):
+        # Filtrer les données pour ne garder que celles à 12h
+        df_midday = self.df[self.df["DateTime_x"].dt.hour == 12]
+
+        # Grouper par jour et prendre la moyenne pour chaque jour
+        df_midday = df_midday.groupby(df_midday["DateTime_x"].dt.date).mean(numeric_only=True)
+
+        # Réinitialiser l'index et renommer la colonne de date
+        df_midday = df_midday.reset_index().rename(columns={"index": "Date"})
+
+        # Calculer la corrélation entre Leq et Lux
+        correlation = df_midday[first_element].corr(df_midday[second_element])
+
+        print(f"Corrélation entre {first_element} et {second_element} à midi : {correlation:.3f}")
+        
+        # Séparer semaine et week-end
+        df_week = df_midday[df_midday["Weekday"] < 5]
+        df_weekend = df_midday[df_midday["Weekday"] >= 5]
+
+        correlation_semaine = df_week[[second_element,first_element]].corr().iloc[0, 1]
+        correlation_weekend = df_weekend[[second_element,first_element]].corr().iloc[0, 1]
+
+        print("Corrélation semaine:", correlation_semaine)
+        print("Corrélation week-end:", correlation_weekend)
     
+        # Tracer le nuage de points
+        plt.figure(figsize=(10, 5))
+        sns.regplot(x=df_week[second_element], y=df_week[first_element], label="Semaine", color='blue')
+        sns.regplot(x=df_weekend[second_element], y=df_weekend[first_element], label="Week-end", color='red')
+        # Ajouter la valeur de corrélation sur le graphique
+        plt.text(0.05, 0.95, f"Corrélation globale: {correlation:.3f}\nCorrélation semaine: {correlation_semaine:.3f}\nCorrélation week-end: {correlation_weekend:.3f}", transform=plt.gca().transAxes, fontsize=12, verticalalignment='top')
+
+        plt.xlabel(f"{second_element}")
+        plt.ylabel(f"{first_element}")
+        plt.title(f"Corrélation entre {first_element} et {second_element} à midi")
+        plt.legend()
+        if first_element == "lux_S1":
+            plt.yscale("log")
+        if second_element == "lux_S1":
+            plt.xscale("log")
+        plt.grid(True, linestyle="--", linewidth=0.5)
+        plt.show()
+    
+    def analyze_correlation_all_hours(self, first_element, second_element):
+        # Extraire l'heure et le jour de la semaine
+        self.df["Hour"] = self.df["DateTime_x"].dt.hour
+        self.df["Weekday"] = self.df["DateTime_x"].dt.weekday  # Lundi = 0, Dimanche = 6
+
+        # Grouper par jour et heure, puis prendre la moyenne
+        df_hourly = self.df.groupby([self.df["DateTime_x"].dt.date, "Hour"]).mean(numeric_only=True).reset_index()
+
+        # Calculer la corrélation pour chaque heure
+        correlations = df_hourly.groupby("Hour")[[second_element, first_element]].corr().iloc[0::2, -1].reset_index()
+        correlations = correlations.rename(columns={first_element: "Correlation"}).drop(columns=["level_1"])
+
+        # Séparer les jours de semaine et les week-ends
+        df_hourly["Weekday"] = pd.to_datetime(df_hourly["DateTime_x"]).dt.weekday
+        df_week = df_hourly[df_hourly["Weekday"] < 5]
+        df_weekend = df_hourly[df_hourly["Weekday"] >= 5]
+
+        # Calculer la corrélation pour semaine et week-end
+        correlation_week = df_week.groupby("Hour")[[second_element, first_element]].corr().iloc[0::2, -1].reset_index()
+        correlation_weekend = df_weekend.groupby("Hour")[[second_element, first_element]].corr().iloc[0::2, -1].reset_index()
+
+        print("Corrélation semaine par heure:")
+        print(correlation_week)
+
+        print("Corrélation week-end par heure:")
+        print(correlation_weekend)
+
+        # Tracer la corrélation en fonction de l'heure
+        plt.figure(figsize=(10, 5))
+        plt.plot(correlations["Hour"], correlations["Correlation"], label="Tous les jours", color="black")
+        plt.plot(correlation_week["Hour"], correlation_week[first_element], label="Semaine", color="blue")
+        plt.plot(correlation_weekend["Hour"], correlation_weekend[first_element], label="Week-end", color="red")
+        
+        plt.xlabel("Heure de la journée")
+        plt.ylabel(f"Corrélation entre {first_element} et {second_element}")
+        plt.title(f"Corrélation entre {first_element} et {second_element} par heure")
+        plt.legend()
+        plt.grid(True, linestyle="--", linewidth=0.5)
+        plt.xticks(np.arange(0, 24, 1))  # Ticks de 0 à 23, un tick par heure
+        plt.show()
 # Exemple d'utilisation:
 analyzer = DataAnalyzer("data.parquet")
 analyzer.analyze_correlation_leq_lux_at_noon()
 analyzer.analyze_correlation_leq_lux_all_hours()
 analyzer.detect_peak_hours()
-analyzer.analyze_weather_impact_on_sound()
-analyzer.analyze_weather_impact_on_light()
+
+# Influence des paramétres météorologiques, long à compiler !
+# analyzer.analyze_weather_impact_on_sound()
+# analyzer.analyze_weather_impact_on_light()
+
+# Choix de paramètres à corréler : ["Leq_dBA", "lux_S1", "Temp (°C)", "Hum. rel (%)", "Pression à la station (kPa)", "Hauteur de précip. (mm)"]
+# Corrélations à midi
+# analyzer.analyze_correlation_at_noon("Leq_dBA","Temp (°C)")
+# analyzer.analyze_correlation_at_noon("Leq_dBA","Pression à la station (kPa)")
+# analyzer.analyze_correlation_at_noon("Leq_dBA","Hum. rel (%)")
+# analyzer.analyze_correlation_at_noon("Leq_dBA","Hauteur de précip. (mm)")
+
+# analyzer.analyze_correlation_at_noon("lux_S1","Temp (°C)")
+# analyzer.analyze_correlation_at_noon("lux_S1","Pression à la station (kPa)")
+# analyzer.analyze_correlation_at_noon("lux_S1","Hum. rel (%)")
+# analyzer.analyze_correlation_at_noon("lux_S1","Hauteur de précip. (mm)")
+
+# Corrélations par heure
+# analyzer.analyze_correlation_all_hours("Leq_dBA","Temp (°C)")
+# analyzer.analyze_correlation_all_hours("Leq_dBA","Pression à la station (kPa)")
+# analyzer.analyze_correlation_all_hours("Leq_dBA","Hum. rel (%)")
+# analyzer.analyze_correlation_all_hours("Leq_dBA","Hauteur de précip. (mm)")
+
+# analyzer.analyze_correlation_all_hours("lux_S1","Temp (°C)")
+# analyzer.analyze_correlation_all_hours("lux_S1","Pression à la station (kPa)")
+# analyzer.analyze_correlation_all_hours("lux_S1","Hum. rel (%)")
+# analyzer.analyze_correlation_all_hours("lux_S1","Hauteur de précip. (mm)")
