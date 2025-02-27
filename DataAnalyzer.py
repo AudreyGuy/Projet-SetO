@@ -15,6 +15,7 @@ class DataAnalyzer:
         self.df["IsWeekend"] = self.df["Weekday"] >= 5
     
     def analyze_correlation_leq_lux_at_noon(self):
+        print("\nEntré dans la fonction analyze_correlation_leq_lux_at_noon\n")
         # Filtrer les données pour ne garder que celles à 12h
         df_midday = self.df[self.df["DateTime_x"].dt.hour == 12]
 
@@ -55,6 +56,7 @@ class DataAnalyzer:
         plt.show()
 
     def analyze_correlation_leq_lux_all_hours(self):
+        print("\nEntré dans la fonction analyze_correlation_leq_lux_all_hours\n")
         # Extraire l'heure et le jour de la semaine
         self.df["Hour"] = self.df["DateTime_x"].dt.hour
         self.df["Weekday"] = self.df["DateTime_x"].dt.weekday  # Lundi = 0, Dimanche = 6
@@ -75,11 +77,17 @@ class DataAnalyzer:
         correlation_week = df_week.groupby("Hour")[["lux_S1", "Leq_dBA"]].corr().iloc[0::2, -1].reset_index()
         correlation_weekend = df_weekend.groupby("Hour")[["lux_S1", "Leq_dBA"]].corr().iloc[0::2, -1].reset_index()
 
-        print("Corrélation semaine par heure:")
-        print(correlation_week)
+        # print("Corrélation semaine par heure:")
+        # print(correlation_week)
 
-        print("Corrélation week-end par heure:")
-        print(correlation_weekend)
+        # print("Corrélation week-end par heure:")
+        # print(correlation_weekend)
+        print("Corrélation semaine moyenne",correlation_week["Leq_dBA"].mean())
+        print("Corrélation semaine min",correlation_week["Leq_dBA"].min())
+        print("Corrélation semaine max",correlation_week["Leq_dBA"].max())
+        print("Corrélation weekend moyenne",correlation_weekend["Leq_dBA"].mean())
+        print("Corrélation weekend min",correlation_weekend["Leq_dBA"].min())
+        print("Corrélation weekend max",correlation_weekend["Leq_dBA"].max())
 
         # Tracer la corrélation en fonction de l'heure
         plt.figure(figsize=(10, 5))
@@ -96,6 +104,7 @@ class DataAnalyzer:
         plt.show()
     
     def analyze_weather_impact_on_sound(self):
+        print("\nEntré dans la fonction analyze_weather_impact_on_sound\n")
         features = ["Temp (°C)", "Hum. rel (%)", "Pression à la station (kPa)", "Hauteur de précip. (mm)"]
         df_ml = self.df.dropna(subset=["Leq_dBA"] + features)  # Retirer les valeurs manquantes
         
@@ -125,6 +134,7 @@ class DataAnalyzer:
         plt.show()
 
     def analyze_weather_impact_on_light(self):
+        print("\nEntré dans la fonction analyze_weather_impact_on_light\n")
         features = ["Temp (°C)", "Hum. rel (%)", "Pression à la station (kPa)", "Hauteur de précip. (mm)"]
         df_ml = self.df.dropna(subset=["lux_S1"] + features)  # Retirer les valeurs manquantes
         
@@ -156,6 +166,7 @@ class DataAnalyzer:
         plt.show()
     
     def detect_peak_hours(self):
+        print("\nEntré dans la fonction detect_peak_hours\n")
         df_hourly = self.df.groupby("Hour")["Leq_dBA"].mean()
         plt.figure(figsize=(8, 5))
         plt.plot(df_hourly.index, df_hourly.values, marker="o", linestyle="-", label="Moyenne horaire du bruit")
@@ -170,6 +181,7 @@ class DataAnalyzer:
         plt.show()
 
     def analyze_correlation_at_noon(self, first_element, second_element):
+        print(f"\nEntré dans la fonction analyze_correlation_at_noon pour {first_element} et {second_element}\n")
         # Filtrer les données pour ne garder que celles à 12h
         df_midday = self.df[self.df["DateTime_x"].dt.hour == 12]
 
@@ -213,6 +225,7 @@ class DataAnalyzer:
         plt.show()
     
     def analyze_correlation_all_hours(self, first_element, second_element):
+        print(f"\nEntré dans la fonction analyze_correlation_all_hours pour {first_element} et {second_element}\n")
         # Extraire l'heure et le jour de la semaine
         self.df["Hour"] = self.df["DateTime_x"].dt.hour
         self.df["Weekday"] = self.df["DateTime_x"].dt.weekday  # Lundi = 0, Dimanche = 6
@@ -233,11 +246,18 @@ class DataAnalyzer:
         correlation_week = df_week.groupby("Hour")[[second_element, first_element]].corr().iloc[0::2, -1].reset_index()
         correlation_weekend = df_weekend.groupby("Hour")[[second_element, first_element]].corr().iloc[0::2, -1].reset_index()
 
-        print("Corrélation semaine par heure:")
-        print(correlation_week)
+        # print("Corrélation semaine par heure:")
+        # print(correlation_week)
 
-        print("Corrélation week-end par heure:")
-        print(correlation_weekend)
+        # print("Corrélation week-end par heure:")
+        # print(correlation_weekend)
+
+        print("Corrélation semaine moyenne",correlation_week[first_element].mean())
+        print("Corrélation semaine min",correlation_week[first_element].min())
+        print("Corrélation semaine max",correlation_week[first_element].max())
+        print("Corrélation weekend moyenne",correlation_weekend[first_element].mean())
+        print("Corrélation weekend min",correlation_weekend[first_element].min())
+        print("Corrélation weekend max",correlation_weekend[first_element].max())
 
         # Tracer la corrélation en fonction de l'heure
         plt.figure(figsize=(10, 5))
