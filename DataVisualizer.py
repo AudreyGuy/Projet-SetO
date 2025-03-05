@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
@@ -6,12 +7,17 @@ class DataVisualizer:
     def __init__(self, file_path):
         self.df = pd.read_parquet(file_path, engine="pyarrow")
         self.df["DateTime_x"] = pd.to_datetime(self.df["DateTime_x"])
+        
+        # 🔹 Conversion en pression acoustique (Pa)
+        self.df["Leq_Pa"] = 20e-6 * 10**(self.df["Leq_dBA"] / 20)
+
+        # 🔹 Création des DataFrames résumés
         self.df_hourly = self._prepare_hourly_data()
         self.df_minutes = self._prepare_minutes_data()
     
     def _prepare_hourly_data(self):
         df_hourly = self.df.resample("h", on="DateTime_x").agg({
-            "Leq_dBA": ["mean", "min", "max"],
+            "Leq_Pa": ["mean", "min", "max"],
             "lux_S1": ["mean", "min", "max"],
             "Temp (°C)": "mean",
             "Hum. rel (%)": "mean",
@@ -19,13 +25,21 @@ class DataVisualizer:
             "Pression à la station (kPa)": "mean",
             "Hauteur de précip. (mm)": "mean"
         })
-        df_hourly.columns = ["Leq_mean", "Leq_min", "Leq_max", "Lux_mean", "Lux_min", "Lux_max", 
-                             "Temp_mean", "Humidity_mean", "Wind_mean", "Pressure_mean", "Precipitations_mean"]
+
+        # 🔹 Conversion inverse en dB
+        df_hourly["Leq_mean"] = 20 * np.log10(df_hourly["Leq_Pa"]["mean"] / 20e-6)
+        df_hourly["Leq_min"] = 20 * np.log10(df_hourly["Leq_Pa"]["min"] / 20e-6)
+        df_hourly["Leq_max"] = 20 * np.log10(df_hourly["Leq_Pa"]["max"] / 20e-6)
+
+        df_hourly.drop(columns=["Leq_Pa"], inplace=True)
+        
+        df_hourly.columns = ["Lux_mean", "Lux_min", "Lux_max", "Temp_mean", "Humidity_mean", "Wind_mean", "Pressure_mean", "Precipitations_mean","Leq_mean", "Leq_min", "Leq_max"]
+        
         return df_hourly.reset_index()
-    
+
     def _prepare_minutes_data(self):
         df_minutes = self.df.resample("min", on="DateTime_x").agg({
-            "Leq_dBA": ["mean", "min", "max"],
+            "Leq_Pa": ["mean", "min", "max"],
             "lux_S1": ["mean", "min", "max"],
             "Temp (°C)": "mean",
             "Hum. rel (%)": "mean",
@@ -33,19 +47,27 @@ class DataVisualizer:
             "Pression à la station (kPa)": "mean",
             "Hauteur de précip. (mm)": "mean"
         })
-        df_minutes.columns = ["Leq_mean", "Leq_min", "Leq_max", "Lux_mean", "Lux_min", "Lux_max", 
-                             "Temp_mean", "Humidity_mean", "Wind_mean", "Pressure_mean", "Precipitations_mean"]
+
+        # 🔹 Conversion inverse en dB
+        df_minutes["Leq_mean"] = 20 * np.log10(df_minutes["Leq_Pa"]["mean"] / 20e-6)
+        df_minutes["Leq_min"] = 20 * np.log10(df_minutes["Leq_Pa"]["min"] / 20e-6)
+        df_minutes["Leq_max"] = 20 * np.log10(df_minutes["Leq_Pa"]["max"] / 20e-6)
+
+        df_minutes.drop(columns=["Leq_Pa"], inplace=True)
+
+        df_minutes.columns = ["Lux_mean", "Lux_min", "Lux_max", "Temp_mean", "Humidity_mean", "Wind_mean", "Pressure_mean", "Precipitations_mean","Leq_mean", "Leq_min", "Leq_max"]
+
         return df_minutes.reset_index()
     
-    def plot_data_by_days(self, start_date, days=7, elements=None):
+    def plot_data_by_days(self, start_date, days=7, elements=None, Pa=False):
         end_date = start_date + pd.Timedelta(days=days)
-        self._plot_time_series(start_date, end_date, elements)
+        self._plot_time_series(start_date, end_date, elements, None, None, Pa)
     
-    def plot_data_by_months(self, start_date, months=1, elements=None):
+    def plot_data_by_months(self, start_date, months=1, elements=None, Pa=False):
         end_date = start_date + pd.DateOffset(months=months)
-        self._plot_time_series(start_date, end_date, elements)
+        self._plot_time_series(start_date, end_date, elements, None, None, Pa)
     
-    def plot_data_by_hour_range(self, start_date, end_date, hours, elements=None):
+    def plot_data_by_hour_range(self, start_date, end_date, hours, elements=None, Pa=False):
         if end_date is None:
             end_date = start_date
         
@@ -56,15 +78,15 @@ class DataVisualizer:
             days = df_filtered["DateTime_x"].dt.date.unique()
             for day in days:
                 df_day = df_filtered[(df_filtered["DateTime_x"].dt.date >= day) & (df_filtered["DateTime_x"].dt.date <= day + pd.Timedelta(days=1))]
-                self._plot_time_series(pd.Timestamp(day), None, elements, df_day, hours)
+                self._plot_time_series(pd.Timestamp(day), None, elements, df_day, hours, Pa)
         else:
             df_filtered = self.df_minutes[(self.df_minutes["DateTime_x"] >= start_date) &
                                      (self.df_minutes["DateTime_x"] <= end_date + pd.Timedelta(days=1) + pd.Timedelta(hours=23) + pd.Timedelta(minutes=59)) &
                                      (self.df_minutes["DateTime_x"].dt.hour.isin(hours))]
             df_day = df_filtered[(df_filtered["DateTime_x"].dt.date >= start_date.date()) & (df_filtered["DateTime_x"].dt.date <= start_date.date() + pd.Timedelta(days=1))]
-            self._plot_time_series(start_date, None, elements, df_day, hours)
+            self._plot_time_series(start_date, None, elements, df_day, hours, Pa)
     
-    def _plot_time_series(self, start_date, end_date, elements=["Leq", "Lux"], df_filtered=None, hours=None):
+    def _plot_time_series(self, start_date, end_date, elements=["Leq", "Lux"], df_filtered=None, hours=None, Pa=False):
         colors = {"Leq": "blue", "Lux": "orange", "Temp": "red", "Humidity": "green", 
                   "Precipitations": "cyan", "Wind": "purple", "Pressure": "brown"}
         
@@ -103,7 +125,10 @@ class DataVisualizer:
             if column_mean in df_filtered.columns:
                 ax.plot(df_filtered["DateTime_x"], df_filtered[column_mean], label=element, 
                         color=colors.get(element, "black"), linestyle="-", linewidth=1.5)
-                ax.set_ylabel(element)
+                if element == "Leq" and Pa:
+                    ax.set_ylabel("Pression acoustique (Pa)")
+                else:
+                    ax.set_ylabel(element+" (dBA)")
                 ax.legend()
                 ax.grid(True, linestyle="--", linewidth=0.5)
                 
@@ -134,7 +159,7 @@ class DataVisualizer:
 
 # Exemple d'utilisation:
 visualizer = DataVisualizer("data.parquet")
-visualizer.plot_data_by_days(start_date=pd.Timestamp("2024-01-02"), days=4, elements=["Leq", "Lux"])
-visualizer.plot_data_by_months(start_date=pd.Timestamp("2023-12-01"), months=1, elements=["Leq", "Lux"])
-visualizer.plot_data_by_hour_range(start_date=pd.Timestamp("2024-01-01"), end_date=None, hours=[23,0,1,2,3], elements=["Leq", "Lux", "Temp", "Humidity", "Wind", "Pressure", "Precipitations"])
-visualizer.plot_data_by_hour_range(start_date=pd.Timestamp("2024-02-01"), end_date=pd.Timestamp("2024-02-02"), hours=[5,6,7], elements=["Leq", "Lux"])
+visualizer.plot_data_by_days(start_date=pd.Timestamp("2024-01-02"), days=4, elements=["Leq", "Lux"], Pa=False)
+visualizer.plot_data_by_months(start_date=pd.Timestamp("2023-12-01"), months=1, elements=["Leq", "Lux"], Pa=False)
+visualizer.plot_data_by_hour_range(start_date=pd.Timestamp("2024-01-01"), end_date=None, hours=[23,0,1,2,3], elements=["Leq", "Lux", "Temp", "Humidity", "Wind", "Pressure", "Precipitations"], Pa=False)
+visualizer.plot_data_by_hour_range(start_date=pd.Timestamp("2024-02-01"), end_date=pd.Timestamp("2024-02-02"), hours=[5,6,7], elements=["Leq", "Lux"], Pa=False)
